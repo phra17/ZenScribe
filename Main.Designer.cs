@@ -30,6 +30,7 @@
         {
             MainText = new RichTextBox();
             Counter = new Label();
+            Clock = new Label();
             SuspendLayout();
             // 
             // MainText
@@ -56,12 +57,25 @@
             Counter.TabIndex = 1;
             Counter.Text = "label1";
             // 
+            // Clock
+            // 
+            Clock.AutoSize = true;
+            Clock.Font = new Font("Courier New", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            Clock.ForeColor = Color.Silver;
+            Clock.Location = new Point(1115, 695);
+            Clock.Name = "Clock";
+            Clock.Size = new Size(62, 17);
+            Clock.TabIndex = 2;
+            Clock.Text = "label1";
+            Clock.TextAlign = ContentAlignment.MiddleRight;
+            // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
             ClientSize = new Size(1189, 724);
+            Controls.Add(Clock);
             Controls.Add(Counter);
             Controls.Add(MainText);
             Name = "Main";
@@ -75,5 +89,6 @@
 
         private RichTextBox MainText;
         private Label Counter;
+        private Label Clock;
     }
 }
