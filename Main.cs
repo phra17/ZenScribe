@@ -11,7 +11,20 @@ namespace TextEdit
     {
         const int updateInterval = 1000;
         const int autosaveInterval = 300000;
+
+        Color black = System.Drawing.ColorTranslator.FromHtml("#000000");
+        Color black1 = System.Drawing.ColorTranslator.FromHtml("#222323");
+        Color black2 = System.Drawing.ColorTranslator.FromHtml("#382b26");
+        Color black3 = System.Drawing.ColorTranslator.FromHtml("#3e232c");
+        Color white = System.Drawing.ColorTranslator.FromHtml("#ffffff");
+        Color white1 = System.Drawing.ColorTranslator.FromHtml("#f0f6f0");
+        Color white2 = System.Drawing.ColorTranslator.FromHtml("#b8c2b9");
+        Color white3 = System.Drawing.ColorTranslator.FromHtml("#edf6d6");
+        public Color[] backgroundColors = new Color[3];
+        public Color[] foregroundColors = new Color[3];
+
         public string[] fonts = new string[3] { "Courier New", "Verdana", "Trebouchet MS" };
+        int currentColorSchemeIndex = 0;
         int currentFontIndex = 0;
         int currentFontSize = 18;
         public string currentFontName;
@@ -60,6 +73,12 @@ namespace TextEdit
                 UpdateCounters();
             }
 
+            if (e.Alt && e.KeyCode == Keys.C) { 
+                currentColorSchemeIndex++;
+                if (currentColorSchemeIndex > backgroundColors.Length - 1) currentColorSchemeIndex = 0;
+                UpdateColors();
+            }
+
             if (e.Alt && e.KeyCode == Keys.Oemplus){
                 currentFontSize++;
                 if (currentFontSize > 64) currentFontSize = 64;
@@ -100,6 +119,18 @@ namespace TextEdit
                 UpdateCounters();
             }
         }
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            UpdateClock();
+        }
+        private void autoSaveTimer_Tick(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(currentFile))
+            {
+                fh.SaveFile(currentFile, MainText);
+                ShowSavedFile();
+            }
+        }
         private void ShowSavedFile() {
             Notification.Text = "File saved!";
             Notification.Refresh();
@@ -113,11 +144,21 @@ namespace TextEdit
             currentFontName = currentFont.Name;
             UpdateCounters();
         }
+        private void UpdateColors() {
+            MainText.BackColor = backgroundColors[currentColorSchemeIndex];
+            MainText.ForeColor = foregroundColors[currentColorSchemeIndex];
+        }
         private void CustomInitialize() {
             kh = new KeyboardHelper(MainText);
             fh = new FileHelper();
             System.Drawing.Font currentFont = new System.Drawing.Font("Courier New", 18);
             MainText.Font = currentFont;
+            backgroundColors[0] = black;
+            backgroundColors[1] = black2;
+            backgroundColors[2] = black3;
+            foregroundColors[0] = white;
+            foregroundColors[1] = white2;
+            foregroundColors[2] = white3;
             currentFontName = currentFont.Name;
             MainText.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
             Counter.Anchor = Notification.Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
@@ -135,17 +176,7 @@ namespace TextEdit
             autoSaveTimer.Start();
             UpdateClock();
             UpdateCounters();
-        }
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            UpdateClock();
-        }
-        private void autoSaveTimer_Tick(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(currentFile)) {
-                fh.SaveFile(currentFile, MainText);
-                ShowSavedFile();
-            }
+            UpdateColors();
         }
         private void UpdateCounters() {
             charactersCount = MainText.Text.Replace("#","").Replace("-","").Length;
