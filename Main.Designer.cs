@@ -31,6 +31,7 @@
             MainText = new RichTextBox();
             Counter = new Label();
             Clock = new Label();
+            Notification = new Label();
             SuspendLayout();
             // 
             // MainText
@@ -69,12 +70,24 @@
             Clock.Text = "label1";
             Clock.TextAlign = ContentAlignment.MiddleRight;
             // 
+            // Notification
+            // 
+            Notification.AutoSize = true;
+            Notification.Font = new Font("Courier New", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            Notification.ForeColor = Color.Silver;
+            Notification.Location = new Point(1047, 695);
+            Notification.Name = "Notification";
+            Notification.Size = new Size(0, 17);
+            Notification.TabIndex = 3;
+            Notification.TextAlign = ContentAlignment.MiddleRight;
+            // 
             // Main
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Black;
             ClientSize = new Size(1189, 724);
+            Controls.Add(Notification);
             Controls.Add(Clock);
             Controls.Add(Counter);
             Controls.Add(MainText);
@@ -90,5 +103,6 @@
         private RichTextBox MainText;
         private Label Counter;
         private Label Clock;
+        private Label Notification;
     }
 }
