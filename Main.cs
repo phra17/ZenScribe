@@ -11,6 +11,7 @@ namespace TextEdit
     {
         const int updateInterval = 1000;
         const int autosaveInterval = 300000;
+        List<string> commandList = new List<string>();  
 
         Color black = System.Drawing.ColorTranslator.FromHtml("#000000");
         Color black1 = System.Drawing.ColorTranslator.FromHtml("#222323");
@@ -61,6 +62,13 @@ namespace TextEdit
                 kh.AddTitle();
             }
 
+            if (e.KeyCode == Keys.F1)
+            {
+                string text = string.Join(Environment.NewLine, commandList);
+                MessageBox.Show(text, "Help",MessageBoxButtons.OK,MessageBoxIcon.Information,
+                    MessageBoxDefaultButton.Button1,MessageBoxOptions.RightAlign);
+            }
+
             if (e.KeyCode == Keys.Tab){
                 e.SuppressKeyPress = true;
                 kh.AddTab();
@@ -101,6 +109,17 @@ namespace TextEdit
                 }
                 else {
                     fh.SaveNewFile(currentFile, MainText);
+                }
+            }
+
+            if (e.Control && e.KeyCode == Keys.N)
+            {
+                if (!string.IsNullOrEmpty(currentFile))
+                {
+                    fh.SaveFile(currentFile, MainText);
+                    ShowSavedFile();
+                    currentFile = "";
+                    MainText.Text = "";
                 }
             }
 
@@ -151,6 +170,16 @@ namespace TextEdit
         private void CustomInitialize() {
             kh = new KeyboardHelper(MainText);
             fh = new FileHelper();
+
+            commandList.Add("Ctrl + S = SAVE");
+            commandList.Add("Ctrl + O = OPEN FILE");
+            commandList.Add("Ctrl + F = SEARCH");
+            commandList.Add("Ctrl + N = NEW FILE");
+            commandList.Add("Alt + = LARGER FONT");
+            commandList.Add("Alt - = SMALLER FONT");
+            commandList.Add("Alt + C = CHANGE COLOR");
+            commandList.Add("Alt + F = CHANGE FONT");
+
             System.Drawing.Font currentFont = new System.Drawing.Font("Courier New", 18);
             MainText.Font = currentFont;
             backgroundColors[0] = black;
