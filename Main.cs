@@ -9,6 +9,8 @@ namespace TextEdit
 {
     public partial class Main : Form
     {
+        const int updateInterval = 1000;
+        const int autosaveInterval = 300000;
         public string[] fonts = new string[3] { "Courier New", "Verdana", "Trebouchet MS" };
         int currentFontIndex = 0;
         int currentFontSize = 18;
@@ -18,18 +20,18 @@ namespace TextEdit
         public int charactersCount = 0;
         public int charactersCountWithOutSpaces = 0;
         System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+        System.Windows.Forms.Timer autoSaveTimer = new System.Windows.Forms.Timer();
         KeyboardHelper kh;
         FileHelper fh;
+
         public Main()
         {
             InitializeComponent();
         }
-
         private void Form1_Load(object sender, EventArgs e)
         {
             CustomInitialize();
         }
-
         private void MainText_TextChanged(object sender, EventArgs e)
         {
             if (MainText.Text.Length > 3) {
@@ -76,11 +78,7 @@ namespace TextEdit
                 if (!string.IsNullOrEmpty(currentFile))
                 {
                     fh.SaveFile(currentFile, MainText);
-                    Notification.Text = "File saved!";
-                    Notification.Refresh();
-                    System.Threading.Thread.Sleep(1000);
-                    Notification.Text = "";
-                    Notification.Refresh();
+                    ShowSavedFile();
                 }
                 else {
                     fh.SaveNewFile(currentFile, MainText);
@@ -102,7 +100,13 @@ namespace TextEdit
                 UpdateCounters();
             }
         }
-
+        private void ShowSavedFile() {
+            Notification.Text = "File saved!";
+            Notification.Refresh();
+            System.Threading.Thread.Sleep(1000);
+            Notification.Text = "";
+            Notification.Refresh();
+        }
         private void UpdateFont() {
             System.Drawing.Font currentFont = new System.Drawing.Font(fonts[currentFontIndex], currentFontSize);
             MainText.Font = currentFont;
@@ -122,16 +126,26 @@ namespace TextEdit
             WindowState = FormWindowState.Maximized;
             MainText.KeyDown += new KeyEventHandler(MainText_KeyDown);
             timer.Tick += new EventHandler(timer_Tick);
+            autoSaveTimer.Tick += new EventHandler(autoSaveTimer_Tick);
             MainText.AcceptsTab = true;
             Clock.TextAlign = ContentAlignment.MiddleRight;
-            timer.Interval = 1000;
+            timer.Interval = updateInterval;
+            autoSaveTimer.Interval = autosaveInterval;
             timer.Start();
+            autoSaveTimer.Start();
             UpdateClock();
             UpdateCounters();
         }
         private void timer_Tick(object sender, EventArgs e)
         {
             UpdateClock();
+        }
+        private void autoSaveTimer_Tick(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(currentFile)) {
+                fh.SaveFile(currentFile, MainText);
+                ShowSavedFile();
+            }
         }
         private void UpdateCounters() {
             charactersCount = MainText.Text.Replace("#","").Replace("-","").Length;
