@@ -11,18 +11,11 @@ namespace TextEdit
     {
         const int updateInterval = 1000;
         const int autosaveInterval = 300000;
+        const int colorCombinations = 3;
         List<string> commandList = new List<string>();  
 
-        Color black = System.Drawing.ColorTranslator.FromHtml("#000000");
-        Color black1 = System.Drawing.ColorTranslator.FromHtml("#222323");
-        Color black2 = System.Drawing.ColorTranslator.FromHtml("#382b26");
-        Color black3 = System.Drawing.ColorTranslator.FromHtml("#3e232c");
-        Color white = System.Drawing.ColorTranslator.FromHtml("#ffffff");
-        Color white1 = System.Drawing.ColorTranslator.FromHtml("#f0f6f0");
-        Color white2 = System.Drawing.ColorTranslator.FromHtml("#b8c2b9");
-        Color white3 = System.Drawing.ColorTranslator.FromHtml("#edf6d6");
-        public Color[] backgroundColors = new Color[3];
-        public Color[] foregroundColors = new Color[3];
+        public Color[] backgroundColors = new Color[colorCombinations];
+        public Color[] foregroundColors = new Color[colorCombinations];
 
         public string[] fonts = new string[3] { "Courier New", "Verdana", "Trebouchet MS" };
         int currentColorSchemeIndex = 0;
@@ -59,7 +52,12 @@ namespace TextEdit
         private void MainText_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter) {
-                kh.AddTitle();
+                e.SuppressKeyPress = true;
+                if (!kh.AddTitle() && !kh.CheckTab()) {
+                    MainText.Text += "\n";
+                    MainText.SelectionStart = MainText.Text.Length;
+                    MainText.SelectionLength = 0;
+                }
             }
 
             if (e.KeyCode == Keys.F1)
@@ -108,7 +106,7 @@ namespace TextEdit
                     ShowSavedFile();
                 }
                 else {
-                    fh.SaveNewFile(currentFile, MainText);
+                    currentFile = fh.SaveNewFile(currentFile, MainText);
                 }
             }
 
@@ -127,7 +125,7 @@ namespace TextEdit
                 Search s = new Search();
                 s.ShowDialog();
                 MainText.Find(s.ReturnValue);
-            } 
+            }
 
             if (e.Control && e.KeyCode == Keys.O) {
                 Tuple<string,string> openFileResult = fh.OpenFile();
@@ -171,23 +169,9 @@ namespace TextEdit
             kh = new KeyboardHelper(MainText);
             fh = new FileHelper();
 
-            commandList.Add("Ctrl + S = SAVE");
-            commandList.Add("Ctrl + O = OPEN FILE");
-            commandList.Add("Ctrl + F = SEARCH");
-            commandList.Add("Ctrl + N = NEW FILE");
-            commandList.Add("Alt + = LARGER FONT");
-            commandList.Add("Alt - = SMALLER FONT");
-            commandList.Add("Alt + C = CHANGE COLOR");
-            commandList.Add("Alt + F = CHANGE FONT");
-
             System.Drawing.Font currentFont = new System.Drawing.Font("Courier New", 18);
             MainText.Font = currentFont;
-            backgroundColors[0] = black;
-            backgroundColors[1] = black2;
-            backgroundColors[2] = black3;
-            foregroundColors[0] = white;
-            foregroundColors[1] = white2;
-            foregroundColors[2] = white3;
+            
             currentFontName = currentFont.Name;
             MainText.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
             Counter.Anchor = Notification.Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
@@ -195,14 +179,18 @@ namespace TextEdit
             FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Maximized;
             MainText.KeyDown += new KeyEventHandler(MainText_KeyDown);
+            MainText.AcceptsTab = true;
+
             timer.Tick += new EventHandler(timer_Tick);
             autoSaveTimer.Tick += new EventHandler(autoSaveTimer_Tick);
-            MainText.AcceptsTab = true;
             Clock.TextAlign = ContentAlignment.MiddleRight;
             timer.Interval = updateInterval;
             autoSaveTimer.Interval = autosaveInterval;
             timer.Start();
             autoSaveTimer.Start();
+
+            GenericHelper.LoadCommandList(commandList);
+            GenericHelper.LoadColorSchemes(backgroundColors, foregroundColors);
             UpdateClock();
             UpdateCounters();
             UpdateColors();

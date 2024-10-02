@@ -13,7 +13,7 @@ namespace ZenScribe.Helpers
             MainText = mainText;
         }
 
-        public void AddTitle()
+        public bool AddTitle()
         {
             int currentLineIndex = MainText.GetLineFromCharIndex(MainText.SelectionStart);
             string lastLine = MainText.Lines[currentLineIndex];
@@ -21,9 +21,25 @@ namespace ZenScribe.Helpers
             if (lastLine.StartsWith("#"))
             {
                 MainText.Text = MainText.Text.Replace(lastLine, lastLine.Replace("#", "###") + "###");
+                MainText.Text += "\n";
                 MainText.SelectionStart = MainText.Text.Length;
                 MainText.SelectionLength = 0;
+                return true;
             }
+            return false;
+        }
+
+        public bool CheckTab() {
+            int currentLineIndex = MainText.GetLineFromCharIndex(MainText.SelectionStart);
+            string lastLine = MainText.Lines[currentLineIndex];
+            if (lastLine.StartsWith("\t")) {
+                MainText.Text += "\n";
+                MainText.Text += "\t";
+                MainText.SelectionStart = MainText.Text.Length;
+                MainText.SelectionLength = 0;
+                return true;
+            }
+            return false;
         }
 
         public void AddTab()

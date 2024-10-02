@@ -36,8 +36,9 @@ namespace ZenScribe.Helpers
             
         }
 
-        public void SaveNewFile(string currentFile, RichTextBox MainText)
+        public string SaveNewFile(string currentFile, RichTextBox MainText)
         {
+            string retval = "";
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.Filter = "Text file|*.txt";
             saveFileDialog1.Title = "Save";
@@ -49,7 +50,9 @@ namespace ZenScribe.Helpers
                 MainText.SaveFile(fs, RichTextBoxStreamType.PlainText);
 
                 fs.Close();
+                retval = saveFileDialog1.FileName;
             }
+            return retval;
         }
     }
 
