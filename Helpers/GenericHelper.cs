@@ -39,7 +39,14 @@ namespace ZenScribe.Helpers
             return (int)((float)MainText.Width / (twoCharW - oneCharW));
         }
 
-        public static void LoadColorSchemes(Color[] backgrounds, Color[] foregrounds) {
+        public static List<string> LoadFonts() {
+            string path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            path += "\\Data\\fonts.txt";
+            string contents = File.ReadAllText(path);
+            return contents.Split(Environment.NewLine).ToList();
+        }
+
+        public static void LoadColorSchemes(List<Color> backgrounds, List<Color> foregrounds) {
             Color black = System.Drawing.ColorTranslator.FromHtml("#000000");
             Color black1 = System.Drawing.ColorTranslator.FromHtml("#222323");
             Color black2 = System.Drawing.ColorTranslator.FromHtml("#382b26");
@@ -48,15 +55,16 @@ namespace ZenScribe.Helpers
             Color white1 = System.Drawing.ColorTranslator.FromHtml("#f0f6f0");
             Color white2 = System.Drawing.ColorTranslator.FromHtml("#b8c2b9");
             Color white3 = System.Drawing.ColorTranslator.FromHtml("#edf6d6");
-            backgrounds[0] = black;
-            backgrounds[1] = black2;
-            backgrounds[2] = black3;
-            foregrounds[0] = white;
-            foregrounds[1] = white2;
-            foregrounds[2] = white3;
+            backgrounds.Add(black);
+            backgrounds.Add(black2);
+            backgrounds.Add(black3);
+            foregrounds.Add(white);
+            foregrounds.Add(white2);
+            foregrounds.Add(white3);
         }
 
-        public static void LoadCommandList(List<string> commandList) {
+        public static List<string> LoadCommandList() {
+            List<string> commandList = new List<string>();
             commandList.Add("Ctrl + S = SAVE");
             commandList.Add("Ctrl + O = OPEN FILE");
             commandList.Add("Ctrl + F = SEARCH");
@@ -65,6 +73,7 @@ namespace ZenScribe.Helpers
             commandList.Add("Alt - = SMALLER FONT");
             commandList.Add("Alt + C = CHANGE COLOR");
             commandList.Add("Alt + F = CHANGE FONT");
+            return commandList;
         }
     }
 

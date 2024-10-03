@@ -12,12 +12,10 @@ namespace TextEdit
         const int updateInterval = 1000;
         const int autosaveInterval = 300000;
         const int colorCombinations = 3;
-        List<string> commandList = new List<string>();  
-
-        public Color[] backgroundColors = new Color[colorCombinations];
-        public Color[] foregroundColors = new Color[colorCombinations];
-
-        public string[] fonts = new string[3] { "Courier New", "Verdana", "Trebouchet MS" };
+        List<string> commandList = new List<string>();
+        public List<Color> backgroundColors = new List<Color>();
+        public List<Color> foregroundColors = new List<Color>();
+        public List<string> fonts = new List<string>();
         int currentColorSchemeIndex = 0;
         int currentFontIndex = 0;
         int currentFontSize = 18;
@@ -51,6 +49,7 @@ namespace TextEdit
         }
         private void MainText_KeyDown(object sender, KeyEventArgs e)
         {
+            // ENTER
             if (e.KeyCode == Keys.Enter) {
                 e.SuppressKeyPress = true;
                 if (!kh.AddTitle() && !kh.CheckTab()) {
@@ -60,6 +59,7 @@ namespace TextEdit
                 }
             }
 
+            // HELP (F1)
             if (e.KeyCode == Keys.F1)
             {
                 string text = string.Join(Environment.NewLine, commandList);
@@ -67,24 +67,28 @@ namespace TextEdit
                     MessageBoxDefaultButton.Button1,MessageBoxOptions.RightAlign);
             }
 
+            // TAB 
             if (e.KeyCode == Keys.Tab){
                 e.SuppressKeyPress = true;
                 kh.AddTab();
             }
 
+            // FONT
             if (e.Alt && e.KeyCode == Keys.F) {
                 currentFontIndex++;
-                if (currentFontIndex > fonts.Length - 1) currentFontIndex = 0;
+                if (currentFontIndex > fonts.Count - 1) currentFontIndex = 0;
                 UpdateFont();
                 UpdateCounters();
             }
 
+            // COLOR
             if (e.Alt && e.KeyCode == Keys.C) { 
                 currentColorSchemeIndex++;
-                if (currentColorSchemeIndex > backgroundColors.Length - 1) currentColorSchemeIndex = 0;
+                if (currentColorSchemeIndex > backgroundColors.Count - 1) currentColorSchemeIndex = 0;
                 UpdateColors();
             }
 
+            // FONT UP
             if (e.Alt && e.KeyCode == Keys.Oemplus){
                 currentFontSize++;
                 if (currentFontSize > 64) currentFontSize = 64;
@@ -92,6 +96,7 @@ namespace TextEdit
                 UpdateCounters();
             }
 
+            // FONT DOWN
             if (e.Alt && e.KeyCode == Keys.OemMinus){
                 currentFontSize--;
                 if(currentFontSize < 8) currentFontSize = 8;
@@ -99,6 +104,7 @@ namespace TextEdit
                 UpdateCounters();
             }
 
+            // SAVE
             if (e.Control && e.KeyCode == Keys.S){
                 if (!string.IsNullOrEmpty(currentFile))
                 {
@@ -110,6 +116,7 @@ namespace TextEdit
                 }
             }
 
+            // NEW FILE
             if (e.Control && e.KeyCode == Keys.N)
             {
                 if (!string.IsNullOrEmpty(currentFile))
@@ -121,12 +128,16 @@ namespace TextEdit
                 }
             }
 
+            // SEARCH
             if (e.Control && e.KeyCode == Keys.F){
                 Search s = new Search();
                 s.ShowDialog();
-                MainText.Find(s.ReturnValue);
+                if (!string.IsNullOrEmpty(s.ReturnValue)) {
+                    MainText.Find(s.ReturnValue);
+                }
             }
 
+            // OPEN FILE
             if (e.Control && e.KeyCode == Keys.O) {
                 Tuple<string,string> openFileResult = fh.OpenFile();
                 MainText.Text = openFileResult.Item2;
@@ -168,19 +179,28 @@ namespace TextEdit
         private void CustomInitialize() {
             kh = new KeyboardHelper(MainText);
             fh = new FileHelper();
-
             System.Drawing.Font currentFont = new System.Drawing.Font("Courier New", 18);
-            MainText.Font = currentFont;
-            
-            currentFontName = currentFont.Name;
+            MainText.Font = currentFont;    
+            currentFontName = currentFont.Name;       
+            MainText.KeyDown += new KeyEventHandler(MainText_KeyDown);
+            MainText.AcceptsTab = true;
+            fonts = GenericHelper.LoadFonts();
+            commandList = GenericHelper.LoadCommandList();
+            GenericHelper.LoadColorSchemes(backgroundColors, foregroundColors);
+            StyleInitializer();
+            UpdateClock();
+            UpdateCounters();
+            UpdateColors();
+            TimerHandler();
+        }
+        private void StyleInitializer() {
             MainText.Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
             Counter.Anchor = Notification.Anchor = AnchorStyles.Right | AnchorStyles.Bottom | AnchorStyles.Left;
             Clock.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Maximized;
-            MainText.KeyDown += new KeyEventHandler(MainText_KeyDown);
-            MainText.AcceptsTab = true;
-
+        }
+        private void TimerHandler() {
             timer.Tick += new EventHandler(timer_Tick);
             autoSaveTimer.Tick += new EventHandler(autoSaveTimer_Tick);
             Clock.TextAlign = ContentAlignment.MiddleRight;
@@ -188,12 +208,6 @@ namespace TextEdit
             autoSaveTimer.Interval = autosaveInterval;
             timer.Start();
             autoSaveTimer.Start();
-
-            GenericHelper.LoadCommandList(commandList);
-            GenericHelper.LoadColorSchemes(backgroundColors, foregroundColors);
-            UpdateClock();
-            UpdateCounters();
-            UpdateColors();
         }
         private void UpdateCounters() {
             charactersCount = MainText.Text.Replace("#","").Replace("-","").Length;
